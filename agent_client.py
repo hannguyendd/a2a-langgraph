@@ -5,7 +5,7 @@ from uuid import uuid4
 
 import httpx
 
-from a2a.client import A2ACardResolver, A2AClient
+from a2a.client import A2ACardResolver, A2AClient, ClientFactory, ClientConfig
 from a2a.types import (
     AgentCard,
     MessageSendParams,
@@ -53,7 +53,7 @@ async def main() -> None:
                 "\nUsing PUBLIC agent card for client initialization (default)."
             )
 
-            if _public_card.supportsAuthenticatedExtendedCard:
+            if _public_card.supports_authenticated_extended_card:
                 try:
                     logger.info(
                         "\nPublic card supports authenticated extended card. "
@@ -100,6 +100,12 @@ async def main() -> None:
             ) from e
 
         # --8<-- [start:send_message]
+        # client_factory = ClientFactory(
+        #     config=ClientConfig(httpx_client=httpx_client),
+        # )
+        # client = client_factory.create(
+        #     card=final_agent_card_to_use,
+        # )
         client = A2AClient(
             httpx_client=httpx_client, agent_card=final_agent_card_to_use
         )

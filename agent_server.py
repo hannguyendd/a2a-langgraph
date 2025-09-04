@@ -8,7 +8,11 @@ import uvicorn
 
 from a2a.server.apps import A2AStarletteApplication
 from a2a.server.request_handlers import DefaultRequestHandler
-from a2a.server.tasks import InMemoryPushNotifier, InMemoryTaskStore
+from a2a.server.tasks import InMemoryTaskStore
+from a2a.server.tasks import (
+    InMemoryPushNotificationConfigStore,
+    BasePushNotificationSender,
+)
 from a2a.types import (
     AgentCapabilities,
     AgentCard,
@@ -57,10 +61,15 @@ def main(host, port):
 
         # --8<-- [start:DefaultRequestHandler]
         httpx_client = httpx.AsyncClient()
+        push_config_store = InMemoryPushNotificationConfigStore()
+        push_sender = BasePushNotificationSender(
+            httpx_client=httpx_client, config_store=push_config_store
+        )
         request_handler = DefaultRequestHandler(
             agent_executor=CurrencyAgentExecutor(),
             task_store=InMemoryTaskStore(),
-            push_notifier=InMemoryPushNotifier(httpx_client),
+            push_sender=push_sender,
+            push_config_store=push_config_store,
         )
         server = A2AStarletteApplication(
             agent_card=agent_card, http_handler=request_handler
